@@ -1,9 +1,12 @@
-require('dotenv').config({ override: true });
+require('dotenv').config();
 const dns = require('dns');
 dns.setServers(['8.8.8.8', '8.8.4.4']);
+
 const express = require('express');
+const http = require('http');
 const cors = require('cors');
 const connectDB = require('./config/db');
+const { initSocket } = require('./socket');
 
 const app = express();
 
@@ -17,7 +20,9 @@ connectDB();
 // Routes
 app.use('/api/restaurants', require('./routes/restaurantRoutes'));
 app.use('/api/tables', require('./routes/tableRoutes'));
-app.use('/api/menu', require('./routes/menuRoute'));
+app.use('/api/menu', require('./routes/menuRoutes'));
+app.use('/api/orders', require('./routes/orderRoutes'));
+app.use('/api/customers', require('./routes/customerRoutes'));
 
 // Health check
 app.get('/', (req, res) => {
@@ -30,7 +35,15 @@ app.use((err, req, res, next) => {
   res.status(500).json({ message: 'Something went wrong', error: err.message });
 });
 
+// IMPORTANT: Socket.io needs a raw HTTP server, not the Express app directly.
+// Express is actually just a request handler that we hand to http.createServer.
+const httpServer = http.createServer(app);
+
+// Attach Socket.io to that same HTTP server, so both REST API and
+// WebSocket connections share one port (no separate server needed).
+initSocket(httpServer);
+
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
+httpServer.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
