@@ -23,6 +23,7 @@ app.use('/api/tables', require('./routes/tableRoutes'));
 app.use('/api/menu', require('./routes/menuRoutes'));
 app.use('/api/orders', require('./routes/orderRoutes'));
 app.use('/api/customers', require('./routes/customerRoutes'));
+app.use('/api/auth', require('./routes/AuthRoutes'));
 
 // Health check
 app.get('/', (req, res) => {
