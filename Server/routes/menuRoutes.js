@@ -6,10 +6,13 @@ const {
     updateMenuItem,
     deleteMenuItem,
 } = require('../controllers/menuController');
+const { protect, authorize } = require('../middleware/authMiddleware');
 
-router.post('/', createMenuItem);
+router.post('/', protect, authorize('admin'), createMenuItem);
+router.patch('/:id', protect, authorize('admin'), updateMenuItem);
+router.delete('/:id', protect, authorize('admin'), deleteMenuItem);
+
+// PUBLIC — customers browse the menu after scanning the QR, with no login
 router.get('/restaurant/:restaurantId', getMenuByRestaurant);
-router.patch('/:id', updateMenuItem);
-router.delete('/:id', deleteMenuItem);
 
 module.exports = router;

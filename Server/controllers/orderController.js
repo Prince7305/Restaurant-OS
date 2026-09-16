@@ -77,6 +77,9 @@ exports.createOrder = async (req, res) => {
 
         // STEP 5: Mark the table as occupied now that an active order exists
         await Table.findByIdAndUpdate(tableId, { status: 'occupied' });
+
+        // STEP 6: Notify the Kitchen Dashboard in real time — no refresh needed.
+        // We emit only to this restaurant's room, so other tenants don't see it.
         getIO().to(restaurantId.toString()).emit('newOrder', order);
 
         res.status(201).json(order);
@@ -85,20 +88,20 @@ exports.createOrder = async (req, res) => {
     }
 };
 
-// @desc    Get all orders for a restaurant (used by Kitchen Dashboard)
-// @route   GET /api/orders/restaurant/:restaurantId
+// @desc    Get all orders for the logged-in admin's restaurant (Kitchen Dashboard)
+// @route   GET /api/orders/restaurant/:restaurantId   (protected — admin only)
 exports.getOrdersByRestaurant = async (req, res) => {
     try {
         const { status } = req.query;
 
-        const filter = { restaurantId: req.params.restaurantId };
+        const filter = { restaurantId: req.user.restaurantId };
         if (status) {
-            filter.status = status; // e.g. ?status=pending for kitchen's "to-do" queue
+            filter.status = status;
         }
 
         const orders = await Order.find(filter)
             .populate('tableId', 'tableNumber')
-            .sort({ createdAt: 1 }); // oldest first — kitchen should handle first-come-first-served
+            .sort({ createdAt: 1 });
 
         res.json(orders);
     } catch (error) {
@@ -117,11 +120,18 @@ exports.updateOrderStatus = async (req, res) => {
             return res.status(400).json({ message: 'Invalid status value' });
         }
 
-        const order = await Order.findByIdAndUpdate(req.params.id, { status }, { new: true });
-
-        if (!order) {
+        const existingOrder = await Order.findById(req.params.id);
+        if (!existingOrder) {
             return res.status(404).json({ message: 'Order not found' });
         }
+
+        // IDOR CHECK: this order must belong to the logged-in admin's own restaurant
+        if (existingOrder.restaurantId.toString() !== req.user.restaurantId.toString()) {
+            return res.status(403).json({ message: 'You do not have access to this order' });
+        }
+
+        const order = await Order.findByIdAndUpdate(req.params.id, { status }, { new: true });
+
         getIO().to(order.restaurantId.toString()).emit('orderStatusUpdated', order);
 
         res.json(order);

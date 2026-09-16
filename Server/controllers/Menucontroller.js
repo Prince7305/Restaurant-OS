@@ -1,14 +1,15 @@
 const MenuItem = require('../models/MenuItem');
 
 // @desc    Add a new menu item
-// @route   POST /api/menu
+// @route   POST /api/menu   (protected — admin only)
 exports.createMenuItem = async (req, res) => {
     try {
-        const { restaurantId, name, description, price, category, imageUrl } = req.body;
+        const restaurantId = req.user.restaurantId; // from token, not body
+        const { name, description, price, category, imageUrl } = req.body;
 
-        if (!restaurantId || !name || !price || !category) {
+        if (!name || !price || !category) {
             return res.status(400).json({
-                message: 'restaurantId, name, price and category are required',
+                message: 'name, price and category are required',
             });
         }
 
@@ -49,17 +50,23 @@ exports.getMenuByRestaurant = async (req, res) => {
 };
 
 // @desc    Update a menu item (price, description, availability, etc.)
-// @route   PATCH /api/menu/:id
+// @route   PATCH /api/menu/:id   (protected — admin only)
 exports.updateMenuItem = async (req, res) => {
     try {
-        const menuItem = await MenuItem.findByIdAndUpdate(req.params.id, req.body, {
-            new: true, // return the updated document, not the old one
-            runValidators: true, // re-check schema rules (e.g. price min: 0) on update too
-        });
-
-        if (!menuItem) {
+        const existingItem = await MenuItem.findById(req.params.id);
+        if (!existingItem) {
             return res.status(404).json({ message: 'Menu item not found' });
         }
+
+        // IDOR CHECK: this item must belong to the logged-in admin's own restaurant
+        if (existingItem.restaurantId.toString() !== req.user.restaurantId.toString()) {
+            return res.status(403).json({ message: 'You do not have access to this menu item' });
+        }
+
+        const menuItem = await MenuItem.findByIdAndUpdate(req.params.id, req.body, {
+            new: true,
+            runValidators: true,
+        });
 
         res.json(menuItem);
     } catch (error) {
@@ -68,14 +75,19 @@ exports.updateMenuItem = async (req, res) => {
 };
 
 // @desc    Permanently delete a menu item
-// @route   DELETE /api/menu/:id
+// @route   DELETE /api/menu/:id   (protected — admin only)
 exports.deleteMenuItem = async (req, res) => {
     try {
-        const menuItem = await MenuItem.findByIdAndDelete(req.params.id);
-
-        if (!menuItem) {
+        const existingItem = await MenuItem.findById(req.params.id);
+        if (!existingItem) {
             return res.status(404).json({ message: 'Menu item not found' });
         }
+
+        if (existingItem.restaurantId.toString() !== req.user.restaurantId.toString()) {
+            return res.status(403).json({ message: 'You do not have access to this menu item' });
+        }
+
+        await MenuItem.findByIdAndDelete(req.params.id);
 
         res.json({ message: 'Menu item deleted successfully' });
     } catch (error) {

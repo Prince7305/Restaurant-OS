@@ -1,11 +1,11 @@
 const Customer = require('../models/Customer');
 
-// @desc    Get all customers for a restaurant (CRM view)
-// @route   GET /api/customers/restaurant/:restaurantId
+// @desc    Get all customers for the logged-in admin's restaurant (CRM view)
+// @route   GET /api/customers/restaurant/:restaurantId   (protected — admin only)
 exports.getCustomersByRestaurant = async (req, res) => {
     try {
-        const customers = await Customer.find({ restaurantId: req.params.restaurantId }).sort({
-            visitCount: -1, // most frequent customers first
+        const customers = await Customer.find({ restaurantId: req.user.restaurantId }).sort({
+            visitCount: -1,
         });
         res.json(customers);
     } catch (error) {
