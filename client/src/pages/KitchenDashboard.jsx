@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { io } from 'socket.io-client';
 import api from '../api/axiosConfig';
 
@@ -120,9 +120,17 @@ function KitchenDashboard() {
     <div className="min-h-screen bg-paper">
       <header className="bg-charcoal text-paper px-6 py-5 flex items-center justify-between">
         <h1 className="font-display text-2xl">Kitchen</h1>
-        <button onClick={handleLogout} className="font-body text-sm text-paper/60">
-          Sign out
-        </button>
+        <div className="flex items-center gap-4">
+          <Link to="/admin/waiter" className="font-body text-sm text-paper/60">
+            Waiter
+          </Link>
+          <Link to="/admin/dashboard" className="font-body text-sm text-paper/60">
+            Dashboard
+          </Link>
+          <button onClick={handleLogout} className="font-body text-sm text-paper/60">
+            Sign out
+          </button>
+        </div>
       </header>
 
       <main className="p-4 md:p-6 grid grid-cols-1 md:grid-cols-3 gap-4">
