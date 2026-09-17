@@ -6,7 +6,7 @@ const express = require('express');
 const http = require('http');
 const cors = require('cors');
 const connectDB = require('./config/db');
-const { initSocket } = require('./socket');
+const { initSocket } = require('./Socket');
 
 const app = express();
 
@@ -23,7 +23,7 @@ app.use('/api/tables', require('./routes/tableRoutes'));
 app.use('/api/menu', require('./routes/menuRoutes'));
 app.use('/api/orders', require('./routes/orderRoutes'));
 app.use('/api/customers', require('./routes/customerRoutes'));
-app.use('/api/auth', require('./routes/AuthRoutes'));
+app.use('/api/auth', require('./routes/authRoutes'));
 
 // Health check
 app.get('/', (req, res) => {

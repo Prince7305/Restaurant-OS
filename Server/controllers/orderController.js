@@ -2,7 +2,7 @@ const Order = require('../models/Order');
 const Customer = require('../models/Customer');
 const MenuItem = require('../models/MenuItem');
 const Table = require('../models/Table');
-const { getIO } = require('../socket');
+const { getIO } = require('../Socket');
 
 // @desc    Place a new order (customer checkout — no login, just name + phone)
 // @route   POST /api/orders
