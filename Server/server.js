@@ -5,7 +5,7 @@ dns.setServers(['8.8.8.8', '8.8.4.4']);
 const express = require('express');
 const http = require('http');
 const cors = require('cors');
-const connectDB = require('./config/db');
+const connectDB = require('./Config/db');
 const { initSocket } = require('./Socket');
 
 const app = express();
