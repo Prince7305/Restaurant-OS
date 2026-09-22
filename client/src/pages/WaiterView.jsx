@@ -39,7 +39,7 @@ function WaiterView() {
     // cares about orders entering or leaving the 'ready' state.
     useEffect(() => {
         if (!user) return;
-        const socket = io('http://localhost:5000');
+        const socket = io(import.meta.env.VITE_SOCKET_URL);
 
         socket.on('connect', () => socket.emit('joinRestaurant', user.restaurantId));
 

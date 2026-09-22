@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import axios from 'axios';
+import api from '../api/axiosConfig';
 
 import MenuManagement from '../components/MenuManagement';
 import TableManagement from '../components/TableManagement';
@@ -48,23 +48,23 @@ const AdminDashboard = () => {
           customersRes,
           ordersRes,
         ] = await Promise.all([
-          axios.get(
-            `http://localhost:5000/api/menu/restaurant/${user.restaurantId}`,
+          api.get(
+            `/menu/restaurant/${user.restaurantId}`,
             { headers }
           ),
 
-          axios.get(
-            `http://localhost:5000/api/tables/restaurant/${user.restaurantId}`,
+          api.get(
+            `/tables/restaurant/${user.restaurantId}`,
             { headers }
           ),
 
-          axios.get(
-            `http://localhost:5000/api/customers/restaurant/${user.restaurantId}`,
+          api.get(
+            `/customers/restaurant/${user.restaurantId}`,
             { headers }
           ),
 
-          axios.get(
-            `http://localhost:5000/api/orders/restaurant/${user.restaurantId}`,
+          api.get(
+            `/orders/restaurant/${user.restaurantId}`,
             { headers }
           ),
         ]);
@@ -190,8 +190,8 @@ const AdminDashboard = () => {
                 key={tab}
                 onClick={() => setActiveTab(tab)}
                 className={`py-4 font-body text-sm capitalize border-b-2 transition whitespace-nowrap ${activeTab === tab
-                    ? 'border-paprika text-ink'
-                    : 'border-transparent text-ink/40 hover:text-ink'
+                  ? 'border-paprika text-ink'
+                  : 'border-transparent text-ink/40 hover:text-ink'
                   }`}
               >
                 {tab}
