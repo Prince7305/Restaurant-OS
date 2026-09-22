@@ -1,2 +1,3 @@
-# Restaurant-OS
-Multi-Restaurant SaaS platform for QR ordering, POS, Kitchen management, billing and restaurant operations.
+# RestaurantOS
+
+Multi-restaurant SaaS platform for QR-based ordering and restaurant operations.
